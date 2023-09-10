@@ -4,10 +4,10 @@ import './Orbits.css';
 
 let orbs = [];
 
-const Orbits = () => {
+const Orbits = (props) => {
     const canvasElem = useRef(null);
     const [count, setCount] = useState(0);
-    const [opt, setOpt] = useState(new Settings());
+    const [opt, setOpt] = useState(new Settings(props.w,props.h));
     let ctx = null;
     let ctx2 = null;
     let currentTime = 0;
@@ -17,8 +17,9 @@ const Orbits = () => {
             this.angle = angle
             this.lastAngle = this.angle;
             this.radius = radius*opt.scale;
-            this.speed = Math.random()/30000 * this.radius + 0.015;
+            this.speed = Math.random()/50000 * this.radius + 0.01;
             this.size = this.radius/200 + .5;
+            this.hasLight = Math.random() > .75;
             this.update();
         }
 
@@ -39,8 +40,8 @@ const Orbits = () => {
                 ctx.fill();
                 ctx.closePath();
             
-                if(opt.toggleLight){
-                    ctx.lineWidth = 1;
+                if(opt.toggleLight && this.hasLight){
+                    ctx.lineWidth = 2;
                     ctx.strokeStyle = 'hsla('+Math.round(this.angle*180/Math.PI)+', 100%, 70%, '+opt.lightAlpha/100+')';
                     ctx.beginPath();
                     ctx.moveTo(opt.center.x ,opt.center.y);
@@ -54,21 +55,25 @@ const Orbits = () => {
     useEffect(() => {
         // setup the canvas
         setup();
-    }, []);
+    }, [orbs]);
 
     // animate the canvas
     useAnimationFrame((deltaTime) => {
-        setCount(prevCount => (prevCount + deltaTime * 0.01) % 100);
-        if(ctx)
-            draw(deltaTime);
+        // limit the framerate to 60 fps
+        if (Date.now() - currentTime > 1/120*1000) {
+            currentTime = Date.now();
+            // draw the next frame
+            if(ctx)
+                draw(deltaTime);
+        }
     });
 
     
-
     const setup = () => {
         const canvas = canvasElem.current;
         ctx = canvas.getContext('2d');
         ctx2 = getOffscreenCanvas();
+        console.log(opt)
 
         // set the initial state
         orbs = [];
@@ -103,9 +108,8 @@ const Orbits = () => {
     }
 
     return (
-        <div className='orbits-container'>
-            <div>{Math.round(count)}, {orbs.length}</div>
-            <canvas ref={canvasElem} width={opt.canvasSize.w} height={opt.canvasSize.h} />
+        <div className='orbits-container background'>
+            <canvas ref={canvasElem} className='orbits-canvas' width={opt.canvasSize.w} height={opt.canvasSize.h} />
         </div>
 
     );
@@ -115,17 +119,24 @@ const Orbits = () => {
 }
 
 class Settings{
-    canvasSize = {w: 1500, h: 1000};
-    orbSize = 1;
+    canvasSize = {};
+    orbSize = .5;
     scale = 3;
-    speed = 50;
+    speed = 30;
     radius = 1;
     center = {x: this.canvasSize.w/2, y: this.canvasSize.h/2};
     clearAlpha = 95;
     toggleLight = true;
     orbitalAlpha = 100;
-    lightAlpha = 5;
-    count = 100;
+    lightAlpha = 3;
+    count = 400;
+
+    constructor(width,height){
+        this.canvasSize.w = width;
+        this.canvasSize.h = height;
+        this.center.x = this.canvasSize.w/2;
+        this.center.y = this.canvasSize.h/2;
+    }
 }
 
 
