@@ -6,11 +6,11 @@ let orbs = [];
 
 const Orbits = (props) => {
     const canvasElem = useRef(null);
-    const [count, setCount] = useState(0);
-    const [opt, setOpt] = useState(new Settings(props.w,props.h));
+    const [opt, setOpt] = useState(new Settings(props.size));
     let ctx = null;
     let ctx2 = null;
     let currentTime = 0;
+
 
     class Orb {
         constructor(radius, angle){
@@ -73,7 +73,6 @@ const Orbits = (props) => {
         const canvas = canvasElem.current;
         ctx = canvas.getContext('2d');
         ctx2 = getOffscreenCanvas();
-        console.log(opt)
 
         // set the initial state
         orbs = [];
@@ -131,9 +130,13 @@ class Settings{
     lightAlpha = 3;
     count = 400;
 
-    constructor(width,height){
-        this.canvasSize.w = width;
-        this.canvasSize.h = height;
+    constructor(size){
+        this.setCanvasSize(size);
+    }
+
+    setCanvasSize(size){
+        this.canvasSize.w = size[0];
+        this.canvasSize.h = size[1];
         this.center.x = this.canvasSize.w/2;
         this.center.y = this.canvasSize.h/2;
     }

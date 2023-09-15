@@ -68,3 +68,11 @@
   color: white;
   font-size: 1rem;
 }
+
+.on-title-card{
+  position:relative
+}
+
+.title-btn{
+  color: white;
+}
